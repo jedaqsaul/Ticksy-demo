@@ -50,8 +50,7 @@ class User(db.Model, SerializerMixin):
     messages_received = db.relationship("Message", back_populates="recipient", foreign_keys="Message.recipient_id")
     logs = db.relationship("Log", back_populates="user")
     reports = db.relationship("Report", back_populates="admin")
-   
-    
+    reviews = db.relationship("Review", back_populates="attendee", cascade="all, delete")
 
 
     def __repr__(self):

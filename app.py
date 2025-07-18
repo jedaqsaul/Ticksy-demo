@@ -18,6 +18,8 @@ from resources.tickets import TicketList, TicketDetail
 from resources.orders import OrderList, OrderDetail
 from resources.payments import STKPush, STKCallback
 from resources.reviews import AddReview, EventReviews
+from resources.admin import AdminDashboard, AdminReports, AllUsers
+# from resources.messages import SendMessage, UserMessages
 
 
 
@@ -89,6 +91,14 @@ api.add_resource(STKCallback, "/payments/callback")
 
 api.add_resource(AddReview, "/events/<int:event_id>/review")
 api.add_resource(EventReviews, "/events/<int:event_id>/reviews")
+
+
+api.add_resource(AdminDashboard, "/admin/dashboard")
+api.add_resource(AdminReports, "/admin/reports")
+api.add_resource(AllUsers, "/admin/users")
+
+# api.add_resource(SendMessage, "/messages/send")
+# api.add_resource(UserMessages, "/messages/inbox")
 
 
 # Run the app
