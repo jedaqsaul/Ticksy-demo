@@ -11,7 +11,9 @@ from dotenv import load_dotenv
 from datetime import timedelta
 
 from models import db
-from resources.auth import Register, Login, Me  # ✅ import auth routes
+from resources.auth import Register, Login, Me  
+from resources.users import Users, UserById, UserStatus, UserRole
+
 
 # Load environment variables
 load_dotenv()
@@ -51,6 +53,15 @@ def missing_token(error):
 api.add_resource(Register, "/signup")
 api.add_resource(Login, "/login")
 api.add_resource(Me, "/me") 
+
+
+# user routes
+
+api.add_resource(Users, "/users")
+api.add_resource(UserById, "/users/<int:id>")
+api.add_resource(UserStatus, "/users/<int:id>/status")
+api.add_resource(UserRole, "/users/<int:id>/role")
+
 
 # Run the app
 if __name__ == "__main__":

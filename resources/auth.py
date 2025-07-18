@@ -17,6 +17,7 @@ signup_parser.add_argument("last_name", required=True)
 signup_parser.add_argument("email", required=True)
 signup_parser.add_argument("phone", required=True)
 signup_parser.add_argument("password", required=True)
+signup_parser.add_argument("role")
 
 login_parser = reqparse.RequestParser()
 login_parser.add_argument("email", required=True)
@@ -34,6 +35,11 @@ class Register(Resource):
         if User.query.filter_by(phone=data["phone"]).first():
             return {"message": "Phone number already registered."}, 400
 
+        # Validate role
+        requested_role = data.get("role", "attendee").lower()
+        if requested_role not in ["attendee", "organizer"]:
+            requested_role = "attendee"
+
         # Hash password
         hashed_pw = bcrypt.generate_password_hash(data["password"]).decode("utf-8")
 
@@ -43,7 +49,7 @@ class Register(Resource):
             email=data["email"],
             phone=data["phone"],
             password=hashed_pw,
-            role="attendee"  # default role
+            role=requested_role
         )
 
         db.session.add(new_user)
@@ -62,6 +68,7 @@ class Register(Resource):
             },
             "access_token": token
         }, 201
+
 
 
 class Login(Resource):

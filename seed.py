@@ -21,6 +21,14 @@ def seed():
             password=bcrypt.generate_password_hash("adminpass").decode('utf-8'),
             role="admin"
         )
+        admin = User(
+            first_name="Celestine", last_name="Mecheo",
+            email="celestine@example.com", phone="0700670001",
+            password=bcrypt.generate_password_hash("celestine123").decode('utf-8'),
+            role="admin"
+        )
+
+        
         organizer = User(
             first_name="Oliver", last_name="Organizer",
             email="organizer@example.com", phone="0700000002",
