@@ -20,6 +20,7 @@ from resources.payments import STKPush, STKCallback
 from resources.reviews import AddReview, EventReviews
 from resources.admin import AdminDashboard, AdminReports, AllUsers
 # from resources.messages import SendMessage, UserMessages
+from resources.profile import MyProfile, ViewUserProfile
 
 
 
@@ -99,6 +100,9 @@ api.add_resource(AllUsers, "/admin/users")
 
 # api.add_resource(SendMessage, "/messages/send")
 # api.add_resource(UserMessages, "/messages/inbox")
+
+api.add_resource(MyProfile, "/profile/me")
+api.add_resource(ViewUserProfile, "/users/<int:id>")
 
 
 # Run the app
