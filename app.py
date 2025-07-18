@@ -13,7 +13,7 @@ from datetime import timedelta
 from models import db
 from resources.auth import Register, Login, Me  
 from resources.users import Users, UserById, UserStatus, UserRole
-from resources.events import EventList, EventDetail, MyEvents
+
 from resources.events import EventList, EventDetail, MyEvents, PendingEvents, ApproveEvent
 
 

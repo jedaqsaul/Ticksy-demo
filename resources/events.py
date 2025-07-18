@@ -40,8 +40,8 @@ event_parser.add_argument("tags", required=False)
 class EventList(Resource):
     def get(self):
         # Public endpoint: view approved events
-        events = Event.query.filter_by(is_approved=True, status="active").all()
-        return [e.to_dict() for e in events], 200
+        events = Event.query.all()
+        return [e.to_dict(rules=Event.serialize_rules) for e in events], 200
 
     @organizer_required
     def post(self):
