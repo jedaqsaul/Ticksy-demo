@@ -1,5 +1,3 @@
-# resources/orders.py
-
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import request
@@ -17,7 +15,16 @@ class OrderList(Resource):
     def get(self):
         user_id = get_jwt_identity()
         orders = Order.query.filter_by(attendee_id=user_id).all()
-        return [o.to_dict() for o in orders], 200
+
+        return [
+            o.to_dict(only=(
+                "id", "order_id", "status", "total_amount", "mpesa_receipt", "created_at",
+                "order_items.id", "order_items.quantity",
+                "order_items.ticket.id", "order_items.ticket.type", "order_items.ticket.price",
+                "order_items.ticket.event.id", "order_items.ticket.event.title"
+            ))
+            for o in orders
+        ], 200
 
     @jwt_required()
     def post(self):
@@ -56,7 +63,12 @@ class OrderList(Resource):
 
         return {
             "message": "Order placed. Proceed to payment.",
-            "order": order.to_dict()
+            "order": order.to_dict(only=(
+                "id", "order_id", "status", "total_amount", "mpesa_receipt", "created_at",
+                "order_items.id", "order_items.quantity",
+                "order_items.ticket.id", "order_items.ticket.type", "order_items.ticket.price",
+                "order_items.ticket.event.id", "order_items.ticket.event.title"
+            ))
         }, 201
 
 
@@ -69,4 +81,9 @@ class OrderDetail(Resource):
         if not order or order.attendee_id != user_id:
             return {"message": "Order not found or unauthorized"}, 404
 
-        return order.to_dict(), 200
+        return order.to_dict(only=(
+            "id", "order_id", "status", "total_amount", "mpesa_receipt", "created_at",
+            "order_items.id", "order_items.quantity",
+            "order_items.ticket.id", "order_items.ticket.type", "order_items.ticket.price",
+            "order_items.ticket.event.id", "order_items.ticket.event.title"
+        )), 200

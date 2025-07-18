@@ -50,6 +50,9 @@ class User(db.Model, SerializerMixin):
     messages_received = db.relationship("Message", back_populates="recipient", foreign_keys="Message.recipient_id")
     logs = db.relationship("Log", back_populates="user")
     reports = db.relationship("Report", back_populates="admin")
+   
+    
+
 
     def __repr__(self):
         return f"<User {self.first_name} {self.last_name}>"
@@ -145,7 +148,7 @@ class Review(db.Model, SerializerMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     rating = db.Column(db.Integer, nullable=False)
-    comment = db.Column(db.Text)
+    comment = db.Column(db.String, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.now)
 
     attendee_id = db.Column(db.Integer, db.ForeignKey("users.id"))
@@ -212,3 +215,5 @@ class Log(db.Model, SerializerMixin):
 
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     user = db.relationship("User", back_populates="logs")
+
+    
