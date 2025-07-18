@@ -2,7 +2,7 @@ from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Event, User, db
 from datetime import datetime
-from flask import request
+from flask import request,make_response, jsonify
 
 # ------------------ Role-Based Decorators ------------------
 
@@ -40,8 +40,14 @@ event_parser.add_argument("tags", required=False)
 class EventList(Resource):
     def get(self):
         # Public endpoint: view approved events
-        events = Event.query.all()
-        return [e.to_dict(rules=Event.serialize_rules) for e in events], 200
+        events = [
+            e.to_dict(only=(
+                "id", "title", "location", "start_time", "end_time", "category", "tags", "status", "is_approved",
+                "organizer.id", "organizer.first_name", "organizer.last_name"
+            ))
+            for e in Event.query.filter_by(is_approved=True).all()
+            ]
+        return make_response(jsonify(events), 200)
 
     @organizer_required
     def post(self):

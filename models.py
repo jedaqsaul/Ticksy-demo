@@ -1,5 +1,3 @@
-# models.py
-
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
 from sqlalchemy.orm import validates
@@ -22,7 +20,17 @@ db = SQLAlchemy(metadata=metadata)
 # ------------------ User ------------------
 class User(db.Model, SerializerMixin):
     __tablename__ = "users"
-    serialize_rules = ("-password", "-messages_sent.sender", "-messages_received.recipient")
+    serialize_rules = (
+        "-password",
+        "-messages_sent.sender",
+        "-messages_received.recipient",
+        "-events.organizer",
+        "-orders.attendee",
+        "-reviews.attendee",
+        "-saved_events.user",
+        "-logs.user",
+        "-reports.admin"
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(50), nullable=False)
@@ -34,7 +42,6 @@ class User(db.Model, SerializerMixin):
     status = db.Column(db.String(20), default="active")
     created_at = db.Column(db.DateTime, default=datetime.now)
 
-    # Relationships
     events = db.relationship("Event", back_populates="organizer", cascade="all, delete")
     orders = db.relationship("Order", back_populates="attendee", cascade="all, delete")
     reviews = db.relationship("Review", back_populates="attendee", cascade="all, delete")
@@ -55,11 +62,16 @@ class User(db.Model, SerializerMixin):
             raise ValueError("Invalid email format")
         return normalized
 
-
 # ------------------ Event ------------------
 class Event(db.Model, SerializerMixin):
     __tablename__ = "events"
-    serialize_rules = ("-organizer.events", "-tickets.event", "-reviews.event", "-saved_events.event")
+    serialize_rules = (
+        "-organizer.events",
+        "-tickets.event",
+        "-reviews.event",
+        "-saved_events.event",
+        "-reports.event"
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
@@ -70,7 +82,7 @@ class Event(db.Model, SerializerMixin):
     category = db.Column(db.String)
     tags = db.Column(db.String)
     is_approved = db.Column(db.Boolean, default=False)
-    status = db.Column(db.String, default="pending")  # active, pending, cancelled
+    status = db.Column(db.String, default="pending")
     created_at = db.Column(db.DateTime, default=datetime.now)
 
     organizer_id = db.Column(db.Integer, db.ForeignKey("users.id"))
@@ -80,14 +92,13 @@ class Event(db.Model, SerializerMixin):
     saved_events = db.relationship("SavedEvent", back_populates="event", cascade="all, delete")
     reports = db.relationship("Report", back_populates="event")
 
-
 # ------------------ Ticket ------------------
 class Ticket(db.Model, SerializerMixin):
     __tablename__ = "tickets"
     serialize_rules = ("-event.tickets", "-order_items.ticket")
 
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String, nullable=False)  # VIP, Early Bird, Regular
+    type = db.Column(db.String, nullable=False)
     price = db.Column(db.Float, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     sold = db.Column(db.Integer, default=0)
@@ -97,7 +108,6 @@ class Ticket(db.Model, SerializerMixin):
     event = db.relationship("Event", back_populates="tickets")
     order_items = db.relationship("OrderItem", back_populates="ticket")
 
-
 # ------------------ Order ------------------
 class Order(db.Model, SerializerMixin):
     __tablename__ = "orders"
@@ -105,7 +115,7 @@ class Order(db.Model, SerializerMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.String, nullable=False, unique=True)
-    status = db.Column(db.String, default="pending")  # pending, paid, failed
+    status = db.Column(db.String, default="pending")
     mpesa_receipt = db.Column(db.String)
     total_amount = db.Column(db.Float, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now)
@@ -113,7 +123,6 @@ class Order(db.Model, SerializerMixin):
     attendee_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     attendee = db.relationship("User", back_populates="orders")
     order_items = db.relationship("OrderItem", back_populates="order", cascade="all, delete")
-
 
 # ------------------ OrderItem ------------------
 class OrderItem(db.Model, SerializerMixin):
@@ -128,7 +137,6 @@ class OrderItem(db.Model, SerializerMixin):
 
     order = db.relationship("Order", back_populates="order_items")
     ticket = db.relationship("Ticket", back_populates="order_items")
-
 
 # ------------------ Review ------------------
 class Review(db.Model, SerializerMixin):
@@ -146,7 +154,6 @@ class Review(db.Model, SerializerMixin):
     attendee = db.relationship("User", back_populates="reviews")
     event = db.relationship("Event", back_populates="reviews")
 
-
 # ------------------ SavedEvent ------------------
 class SavedEvent(db.Model, SerializerMixin):
     __tablename__ = "saved_events"
@@ -161,10 +168,10 @@ class SavedEvent(db.Model, SerializerMixin):
     user = db.relationship("User", back_populates="saved_events")
     event = db.relationship("Event", back_populates="saved_events")
 
-
 # ------------------ Message ------------------
 class Message(db.Model, SerializerMixin):
     __tablename__ = "messages"
+    serialize_rules = ("-sender.messages_sent", "-recipient.messages_received")
 
     id = db.Column(db.Integer, primary_key=True)
     subject = db.Column(db.String)
@@ -178,10 +185,10 @@ class Message(db.Model, SerializerMixin):
     sender = db.relationship("User", back_populates="messages_sent", foreign_keys=[sender_id])
     recipient = db.relationship("User", back_populates="messages_received", foreign_keys=[recipient_id])
 
-
 # ------------------ Report ------------------
 class Report(db.Model, SerializerMixin):
     __tablename__ = "reports"
+    serialize_rules = ("-admin.reports", "-event.reports")
 
     id = db.Column(db.Integer, primary_key=True)
     generated_at = db.Column(db.DateTime, default=datetime.now)
@@ -193,16 +200,15 @@ class Report(db.Model, SerializerMixin):
     admin = db.relationship("User", back_populates="reports")
     event = db.relationship("Event", back_populates="reports")
 
-
 # ------------------ Log ------------------
 class Log(db.Model, SerializerMixin):
     __tablename__ = "logs"
+    serialize_rules = ("-user.logs",)
 
     id = db.Column(db.Integer, primary_key=True)
     action = db.Column(db.String)
-    meta_data = db.Column(db.Text)  # <- renamed from 'metadata'
+    meta_data = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.now)
 
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     user = db.relationship("User", back_populates="logs")
-
