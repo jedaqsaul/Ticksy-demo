@@ -79,7 +79,13 @@ class EventDetail(Resource):
         event = Event.query.get(id)
         if not event:
             return {"message": "Event not found"}, 404
-        return event.to_dict(), 200
+
+        return event.to_dict(only=(
+            "id", "title", "description", "location", "start_time", "end_time",
+            "category", "tags", "status", "is_approved", "created_at",
+            "organizer.id", "organizer.first_name", "organizer.last_name"
+        )), 200
+
 
     @organizer_required
     def put(self, id):
