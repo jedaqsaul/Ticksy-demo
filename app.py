@@ -13,6 +13,8 @@ from datetime import timedelta
 from models import db
 from resources.auth import Register, Login, Me  
 from resources.users import Users, UserById, UserStatus, UserRole
+from resources.events import EventList, EventDetail, MyEvents
+from resources.events import EventList, EventDetail, MyEvents, PendingEvents, ApproveEvent
 
 
 # Load environment variables
@@ -61,6 +63,15 @@ api.add_resource(Users, "/users")
 api.add_resource(UserById, "/users/<int:id>")
 api.add_resource(UserStatus, "/users/<int:id>/status")
 api.add_resource(UserRole, "/users/<int:id>/role")
+
+
+# event routes
+
+api.add_resource(EventList, "/events")
+api.add_resource(EventDetail, "/events/<int:id>")
+api.add_resource(MyEvents, "/organizer/events")
+api.add_resource(PendingEvents, "/admin/events/pending")
+api.add_resource(ApproveEvent, "/admin/events/<int:id>/approve")
 
 
 # Run the app
