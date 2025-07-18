@@ -1,5 +1,5 @@
 # resources/auth.py
-
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restful import Resource, reqparse
 from flask import request
 from flask_jwt_extended import create_access_token
@@ -86,3 +86,23 @@ class Login(Resource):
             },
             "access_token": token
         }, 200
+    
+class Me(Resource):
+    @jwt_required()
+    def get(self):
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+
+        if not user:
+            return {"message": "User not found"}, 404
+
+        return {
+            "id": user.id,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "role": user.role,
+            "status": user.status,
+        }, 200
+    
+
