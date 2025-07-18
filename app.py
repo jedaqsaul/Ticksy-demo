@@ -21,6 +21,7 @@ from resources.reviews import AddReview, EventReviews
 from resources.admin import AdminDashboard, AdminReports, AllUsers
 # from resources.messages import SendMessage, UserMessages
 from resources.profile import MyProfile, ViewUserProfile
+from resources.organizer_dashboard import OrganizerOverview, OrganizerEventStats
 
 
 
@@ -103,6 +104,10 @@ api.add_resource(AllUsers, "/admin/users")
 
 api.add_resource(MyProfile, "/profile/me")
 api.add_resource(ViewUserProfile, "/users/<int:id>")
+
+
+api.add_resource(OrganizerOverview, "/organizer/overview")
+api.add_resource(OrganizerEventStats, "/organizer/stats")
 
 
 # Run the app
