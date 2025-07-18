@@ -13,8 +13,12 @@ from datetime import timedelta
 from models import db
 from resources.auth import Register, Login, Me  
 from resources.users import Users, UserById, UserStatus, UserRole
-
 from resources.events import EventList, EventDetail, MyEvents, PendingEvents, ApproveEvent
+from resources.tickets import TicketList, TicketDetail
+from resources.orders import OrderList, OrderDetail
+from resources.payments import STKPush, STKCallback
+
+
 
 
 # Load environment variables
@@ -72,6 +76,15 @@ api.add_resource(EventDetail, "/events/<int:id>")
 api.add_resource(MyEvents, "/organizer/events")
 api.add_resource(PendingEvents, "/admin/events/pending")
 api.add_resource(ApproveEvent, "/admin/events/<int:id>/approve")
+api.add_resource(TicketList, "/events/<int:event_id>/tickets")
+api.add_resource(TicketDetail, "/tickets/<int:id>")
+
+
+api.add_resource(OrderList, "/orders")
+api.add_resource(OrderDetail, "/orders/<int:id>")
+api.add_resource(STKPush, "/payments/stk-push")
+api.add_resource(STKCallback, "/payments/callback")
+
 
 
 # Run the app
