@@ -82,7 +82,6 @@ api.add_resource(MyEvents, "/organizer/events")
 api.add_resource(PendingEvents, "/admin/events/pending")
 api.add_resource(ApproveEvent, "/admin/events/<int:id>/approve")
 api.add_resource(TicketList, "/events/<int:event_id>/tickets")
-api.add_resource(TicketDetail, "/tickets/<int:id>")
 
 
 api.add_resource(OrderList, "/orders")

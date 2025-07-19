@@ -13,11 +13,26 @@ profile_parser.add_argument("gender", type=str)
 profile_parser.add_argument("status", type=str)
 
 
+def serialize_user(user):
+    return {
+        "id": user.id,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "email": user.email,
+        "phone": user.phone,
+        "gender": user.gender,
+        "role": user.role,
+        "status": user.status,
+    }
+
+
 class MyProfile(Resource):
     @jwt_required()
     def get(self):
         user = User.query.get(get_jwt_identity())
-        return user.to_dict(), 200
+        if not user:
+            return {"message": "User not found"}, 404
+        return serialize_user(user), 200
 
     @jwt_required()
     def put(self):
@@ -25,11 +40,11 @@ class MyProfile(Resource):
         data = profile_parser.parse_args()
 
         for field in data:
-            if data[field]:
+            if data[field] is not None:
                 setattr(user, field, data[field])
 
         db.session.commit()
-        return user.to_dict(), 200
+        return serialize_user(user), 200
 
 
 class ViewUserProfile(Resource):
@@ -38,4 +53,4 @@ class ViewUserProfile(Resource):
         user = User.query.get(id)
         if not user:
             return {"message": "User not found"}, 404
-        return user.to_dict(), 200
+        return serialize_user(user), 200

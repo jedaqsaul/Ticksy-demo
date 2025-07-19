@@ -25,7 +25,7 @@ class AdminDashboard(Resource):
         total_users = User.query.count()
         total_revenue = db.session.query(func.sum(Order.total_amount)).scalar() or 0
         ticket_sales = db.session.query(func.sum(Ticket.sold)).scalar() or 0
-        active_events = Event.query.filter_by(status="active").count()
+        active_events = Event.query.filter_by(status="approved").count()
         pending_events = Event.query.filter_by(status="pending").count()
 
         recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
