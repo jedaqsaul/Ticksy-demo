@@ -1,14 +1,15 @@
+# resources/admin.py
+
 from models import db, User, Event, Ticket, Order, OrderItem
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import request
-
 from datetime import datetime
 from sqlalchemy import func
-
-# ------------------ Decorator ------------------
+from functools import wraps
 
 def admin_required(fn):
+    @wraps(fn)
     @jwt_required()
     def wrapper(*args, **kwargs):
         user = User.query.get(get_jwt_identity())
@@ -16,8 +17,6 @@ def admin_required(fn):
             return {"message": "Admin access only"}, 403
         return fn(*args, **kwargs)
     return wrapper
-
-# ------------------ Admin Dashboard ------------------
 
 class AdminDashboard(Resource):
     @admin_required
@@ -49,8 +48,6 @@ class AdminDashboard(Resource):
             ]
         }, 200
 
-# ------------------ Reports ------------------
-
 class AdminReports(Resource):
     @admin_required
     def get(self):
@@ -59,7 +56,6 @@ class AdminReports(Resource):
         event_name = request.args.get("event_name")
 
         query = db.session.query(Order).join(Order.order_items).join(OrderItem.ticket).join(Ticket.event).join(Order.attendee)
-
 
         if start_date:
             start = datetime.fromisoformat(start_date)
@@ -85,8 +81,6 @@ class AdminReports(Resource):
             }
             for o in results
         ], 200
-
-# ------------------ Users List ------------------
 
 class AllUsers(Resource):
     @admin_required

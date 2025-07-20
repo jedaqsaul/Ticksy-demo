@@ -46,5 +46,13 @@
 
 ### what is missing?
 
-- calender intergration
-- messaging
+- calender intergration\*\*
+- messaging/email
+- attendee and organizer profiles
+- add images to event model
+- organizers approved events, pending events, rejected events and event history
+- logs
+- add ticket sales to report
+- add user status to users table
+- add attendee column to events
+- add attendee list to order_items

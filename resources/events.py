@@ -2,7 +2,7 @@ from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Event, User, db
 from datetime import datetime
-from flask import request,make_response, jsonify
+from flask import request, make_response, jsonify
 
 # ------------------ Role-Based Decorators ------------------
 
@@ -34,6 +34,7 @@ event_parser.add_argument("start_time", required=True)
 event_parser.add_argument("end_time", required=True)
 event_parser.add_argument("category", required=True)
 event_parser.add_argument("tags", required=False)
+event_parser.add_argument("image_url", required=False)
 
 # ------------------ Organizer: Events CRUD ------------------
 
@@ -42,11 +43,12 @@ class EventList(Resource):
         # Public endpoint: view approved events
         events = [
             e.to_dict(only=(
-                "id", "title", "location", "start_time", "end_time", "category", "tags", "status", "is_approved",
+                "id", "title", "location", "start_time", "end_time", "category",
+                "tags", "status", "is_approved", "image_url",
                 "organizer.id", "organizer.first_name", "organizer.last_name"
             ))
             for e in Event.query.filter_by(is_approved=True).all()
-            ]
+        ]
         return make_response(jsonify(events), 200)
 
     @organizer_required
@@ -62,7 +64,8 @@ class EventList(Resource):
                 start_time=datetime.fromisoformat(data["start_time"]),
                 end_time=datetime.fromisoformat(data["end_time"]),
                 category=data["category"],
-                tags=data["tags"],
+                tags=data.get("tags"),
+                image_url=data.get("image_url"),
                 organizer_id=organizer_id,
                 status="pending",
                 is_approved=False
@@ -73,7 +76,6 @@ class EventList(Resource):
         except Exception as e:
             return {"message": str(e)}, 400
 
-
 class EventDetail(Resource):
     def get(self, id):
         event = Event.query.get(id)
@@ -82,10 +84,9 @@ class EventDetail(Resource):
 
         return event.to_dict(only=(
             "id", "title", "description", "location", "start_time", "end_time",
-            "category", "tags", "status", "is_approved", "created_at",
+            "category", "tags", "image_url", "status", "is_approved", "created_at",
             "organizer.id", "organizer.first_name", "organizer.last_name"
         )), 200
-
 
     @organizer_required
     def put(self, id):
@@ -96,7 +97,7 @@ class EventDetail(Resource):
             return {"message": "Not authorized to edit this event"}, 403
 
         data = request.get_json()
-        for key in ["title", "description", "location", "category", "tags"]:
+        for key in ["title", "description", "location", "category", "tags", "image_url"]:
             if key in data:
                 setattr(event, key, data[key])
         if "start_time" in data:
@@ -119,7 +120,6 @@ class EventDetail(Resource):
         db.session.commit()
         return {"message": "Event deleted successfully"}, 200
 
-
 class MyEvents(Resource):
     @organizer_required
     def get(self):
@@ -134,7 +134,6 @@ class PendingEvents(Resource):
     def get(self):
         events = Event.query.filter_by(is_approved=False).all()
         return [e.to_dict() for e in events], 200
-
 
 class ApproveEvent(Resource):
     @admin_required

@@ -19,9 +19,21 @@ from resources.orders import OrderList, OrderDetail
 from resources.payments import STKPush, STKCallback
 from resources.reviews import AddReview, EventReviews
 from resources.admin import AdminDashboard, AdminReports, AllUsers
-# from resources.messages import SendMessage, UserMessages
+
 from resources.profile import MyProfile, ViewUserProfile
 from resources.organizer_dashboard import OrganizerOverview, OrganizerEventStats
+from resources.logs import AdminLogs
+
+from resources.organizer_dashboard import (
+    OrganizerOverview,
+    OrganizerEventStats,
+    OrganizerEventsByStatus,
+    OrganizerEventHistory
+)
+
+from resources.organizer_dashboard import OrganizerEventsByStatus, OrganizerEventHistory
+from resources.attendee_routes import UpcomingAttendeeEvents,PastAttendeeEvents
+
 
 
 
@@ -98,16 +110,26 @@ api.add_resource(AdminDashboard, "/admin/dashboard")
 api.add_resource(AdminReports, "/admin/reports")
 api.add_resource(AllUsers, "/admin/users")
 
-# api.add_resource(SendMessage, "/messages/send")
-# api.add_resource(UserMessages, "/messages/inbox")
+
 
 api.add_resource(MyProfile, "/profile/me")
 api.add_resource(ViewUserProfile, "/users/<int:id>")
 
 
+
+
+
+
 api.add_resource(OrganizerOverview, "/organizer/overview")
 api.add_resource(OrganizerEventStats, "/organizer/stats")
+api.add_resource(OrganizerEventsByStatus, "/organizer/events/<string:status>")
+api.add_resource(OrganizerEventHistory, "/organizer/events/history")
 
+api.add_resource(UpcomingAttendeeEvents, "/attendee/upcoming-events")
+api.add_resource(PastAttendeeEvents, "/attendee/past-events")
+
+
+api.add_resource(AdminLogs, "/admin/logs")
 
 # Run the app
 if __name__ == "__main__":

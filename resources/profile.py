@@ -1,5 +1,3 @@
-# resources/profile.py
-
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db, User
@@ -9,9 +7,7 @@ profile_parser.add_argument("first_name", type=str)
 profile_parser.add_argument("last_name", type=str)
 profile_parser.add_argument("email", type=str)
 profile_parser.add_argument("phone", type=str)
-profile_parser.add_argument("gender", type=str)
 profile_parser.add_argument("status", type=str)
-
 
 def serialize_user(user):
     return {
@@ -20,11 +16,9 @@ def serialize_user(user):
         "last_name": user.last_name,
         "email": user.email,
         "phone": user.phone,
-        "gender": user.gender,
         "role": user.role,
         "status": user.status,
     }
-
 
 class MyProfile(Resource):
     @jwt_required()
@@ -45,7 +39,6 @@ class MyProfile(Resource):
 
         db.session.commit()
         return serialize_user(user), 200
-
 
 class ViewUserProfile(Resource):
     @jwt_required()

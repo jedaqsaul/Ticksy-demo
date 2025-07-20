@@ -5,7 +5,6 @@ from sqlalchemy_serializer import SerializerMixin
 from datetime import datetime
 import re
 
-# Metadata naming convention
 convention = {
     "ix": "ix_%(column_0_label)s",
     "uq": "uq_%(table_name)s_%(column_0_name)s",
@@ -22,8 +21,6 @@ class User(db.Model, SerializerMixin):
     __tablename__ = "users"
     serialize_rules = (
         "-password",
-        "-messages_sent.sender",
-        "-messages_received.recipient",
         "-events.organizer",
         "-orders.attendee",
         "-reviews.attendee",
@@ -46,12 +43,8 @@ class User(db.Model, SerializerMixin):
     orders = db.relationship("Order", back_populates="attendee", cascade="all, delete")
     reviews = db.relationship("Review", back_populates="attendee", cascade="all, delete")
     saved_events = db.relationship("SavedEvent", back_populates="user", cascade="all, delete")
-    messages_sent = db.relationship("Message", back_populates="sender", foreign_keys="Message.sender_id")
-    messages_received = db.relationship("Message", back_populates="recipient", foreign_keys="Message.recipient_id")
     logs = db.relationship("Log", back_populates="user")
     reports = db.relationship("Report", back_populates="admin")
-    reviews = db.relationship("Review", back_populates="attendee", cascade="all, delete")
-
 
     def __repr__(self):
         return f"<User {self.first_name} {self.last_name}>"
@@ -85,6 +78,8 @@ class Event(db.Model, SerializerMixin):
     tags = db.Column(db.String)
     is_approved = db.Column(db.Boolean, default=False)
     status = db.Column(db.String, default="pending")
+    image_url = db.Column(db.String)  # NEW: Event poster
+    attendee_count = db.Column(db.Integer, default=0)  # NEW: attendee tracking
     created_at = db.Column(db.DateTime, default=datetime.now)
 
     organizer_id = db.Column(db.Integer, db.ForeignKey("users.id"))
@@ -170,23 +165,6 @@ class SavedEvent(db.Model, SerializerMixin):
     user = db.relationship("User", back_populates="saved_events")
     event = db.relationship("Event", back_populates="saved_events")
 
-# ------------------ Message ------------------
-class Message(db.Model, SerializerMixin):
-    __tablename__ = "messages"
-    serialize_rules = ("-sender.messages_sent", "-recipient.messages_received")
-
-    id = db.Column(db.Integer, primary_key=True)
-    subject = db.Column(db.String)
-    body = db.Column(db.Text)
-    read_status = db.Column(db.String, default="unread")
-    sent_at = db.Column(db.DateTime, default=datetime.now)
-
-    sender_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    recipient_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-
-    sender = db.relationship("User", back_populates="messages_sent", foreign_keys=[sender_id])
-    recipient = db.relationship("User", back_populates="messages_received", foreign_keys=[recipient_id])
-
 # ------------------ Report ------------------
 class Report(db.Model, SerializerMixin):
     __tablename__ = "reports"
@@ -214,5 +192,3 @@ class Log(db.Model, SerializerMixin):
 
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     user = db.relationship("User", back_populates="logs")
-
-    
