@@ -16,6 +16,25 @@ convention = {
 metadata = MetaData(naming_convention=convention)
 db = SQLAlchemy(metadata=metadata)
 
+
+# ... [Imports remain unchanged] ...
+
+# ------------------ EventPass ------------------
+class EventPass(db.Model, SerializerMixin):
+    __tablename__ = "event_passes"
+    serialize_rules = ("-order_item.event_passes",)
+
+    id = db.Column(db.Integer, primary_key=True)
+    ticket_code = db.Column(db.String(50), unique=True, nullable=False)
+    attendee_first_name = db.Column(db.String(100), nullable=False)
+    attendee_last_name = db.Column(db.String(100), nullable=False)
+    attendee_email = db.Column(db.String(150), nullable=False)
+    attendee_phone = db.Column(db.String(20), nullable=False)
+    att_status = db.Column(db.Boolean, default=False)
+
+    order_item_id = db.Column(db.Integer, db.ForeignKey("order_items.id"), nullable=False)
+    order_item = db.relationship("OrderItem", back_populates="event_passes")
+
 # ------------------ User ------------------
 class User(db.Model, SerializerMixin):
     __tablename__ = "users"
@@ -35,7 +54,7 @@ class User(db.Model, SerializerMixin):
     email = db.Column(db.String(100), unique=True, nullable=False)
     phone = db.Column(db.String(20), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(20), default="attendee")  # attendee, organizer, admin
+    role = db.Column(db.String(20), default="attendee")
     status = db.Column(db.String(20), default="active")
     created_at = db.Column(db.DateTime, default=datetime.now)
 
@@ -78,8 +97,8 @@ class Event(db.Model, SerializerMixin):
     tags = db.Column(db.String)
     is_approved = db.Column(db.Boolean, default=False)
     status = db.Column(db.String, default="pending")
-    image_url = db.Column(db.String)  # NEW: Event poster
-    attendee_count = db.Column(db.Integer, default=0)  # NEW: attendee tracking
+    image_url = db.Column(db.String)
+    attendee_count = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.now)
 
     organizer_id = db.Column(db.Integer, db.ForeignKey("users.id"))
@@ -134,6 +153,9 @@ class OrderItem(db.Model, SerializerMixin):
 
     order = db.relationship("Order", back_populates="order_items")
     ticket = db.relationship("Ticket", back_populates="order_items")
+
+    # New relationship to EventPass
+    event_passes = db.relationship("EventPass", back_populates="order_item", cascade="all, delete-orphan")
 
 # ------------------ Review ------------------
 class Review(db.Model, SerializerMixin):
